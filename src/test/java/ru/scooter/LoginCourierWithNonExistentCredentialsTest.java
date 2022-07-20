@@ -10,7 +10,7 @@ import ru.scooter.pojo.ScooterApiClient;
 import static org.apache.http.HttpStatus.SC_NOT_FOUND;
 import static org.junit.Assert.assertEquals;
 
-public class LoginWithNonExistentCredentialsTest {
+public class LoginCourierWithNonExistentCredentialsTest {
 
     ScooterApiClient client;
     String password = RandomStringUtils.randomAlphabetic(10);

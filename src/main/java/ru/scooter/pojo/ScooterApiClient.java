@@ -49,4 +49,27 @@ public class ScooterApiClient {
                 .path("ok");
     }
 
+    public Response createOrder(Order newOrder) {
+        return RestAssured.with()
+                .filters(List.of(requestFilter, responseFilter))
+                .baseUri(BASE_URL)
+                .accept(ContentType.JSON)
+                .contentType(ContentType.JSON)
+                .body(newOrder)
+                .when()
+                .post("/orders");
+    }
+
+//    public void deleteOrder(Integer responseMessage) {
+//        String json = "{\"track\": }";
+//        RestAssured.with()
+//                .filters(List.of(requestFilter, responseFilter))
+//                .baseUri(BASE_URL)
+//                .accept(ContentType.JSON)
+//                .contentType(ContentType.JSON)
+//                .body(responseMessage)
+//                .when()
+//                .put("/orders/cancel");
+//    }
+
 }
