@@ -1,0 +1,6 @@
+ru\scooter\LoginCourierWithNonExistentCredentialsTest.class
+ru\scooter\OrdersListTest.class
+ru\scooter\CreatingCourierTest.class
+ru\scooter\CreatingCourierWithoutPasswordTest.class
+ru\scooter\LoginCourierTest.class
+ru\scooter\NewOrderTest.class

@@ -1,0 +1,12 @@
+-------------------------------------------------------------------------------
+Test set: ru.scooter.LoginCourierTest
+-------------------------------------------------------------------------------
+Tests run: 3, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 1.472 s <<< FAILURE! - in ru.scooter.LoginCourierTest
+loginWithoutOneOfCredentials(ru.scooter.LoginCourierTest)  Time elapsed: 0.572 s  <<< FAILURE!
+org.junit.ComparisonFailure: expected:<[???????????? ?????? ??? ?????]> but was:<[�?едо�?таточно данных дл�? входа]>
+	at ru.scooter.LoginCourierTest.loginWithoutOneOfCredentials(LoginCourierTest.java:74)
+
+incorrectCredentialsTest(ru.scooter.LoginCourierTest)  Time elapsed: 0.508 s  <<< FAILURE!
+org.junit.ComparisonFailure: expected:<[??????? ?????? ?? ???????]> but was:<[Учетна�? запи�?ь не найдена]>
+	at ru.scooter.LoginCourierTest.incorrectCredentialsTest(LoginCourierTest.java:61)
+

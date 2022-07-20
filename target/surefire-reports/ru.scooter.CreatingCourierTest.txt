@@ -1,0 +1,8 @@
+-------------------------------------------------------------------------------
+Test set: ru.scooter.CreatingCourierTest
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 3.539 s <<< FAILURE! - in ru.scooter.CreatingCourierTest
+attemptToCreateExistingCourier(ru.scooter.CreatingCourierTest)  Time elapsed: 2.97 s  <<< FAILURE!
+java.lang.AssertionError: expected:<null> but was:<Этот логин уже и�?пользует�?�?>
+	at ru.scooter.CreatingCourierTest.attemptToCreateExistingCourier(CreatingCourierTest.java:57)
+
