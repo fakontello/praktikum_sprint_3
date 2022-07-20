@@ -1,5 +1,7 @@
 package ru.scooter.pojo;
 
+import org.apache.commons.lang3.RandomStringUtils;
+
 public class NewCourier {
 
     private String login;
@@ -12,8 +14,6 @@ public class NewCourier {
         this.firstName = firstName;
     }
 
-    public NewCourier() {
-    }
 
     public String getLogin() {
         return login;
@@ -39,13 +39,11 @@ public class NewCourier {
         this.firstName = firstName;
     }
 
-    @Override
-    public String toString() {
-        return "NewCourier{" +
-                "login='" + login + '\'' +
-                ", password='" + password + '\'' +
-                ", firstName='" + firstName + '\'' +
-                '}';
+    public static NewCourier getRandomCourier() {
+        String login = RandomStringUtils.randomAlphabetic(10);
+        String password = RandomStringUtils.randomAlphabetic(10);
+        String firstName = RandomStringUtils.randomAlphabetic(10);
+        return new NewCourier(login, password, firstName);
     }
 
 }

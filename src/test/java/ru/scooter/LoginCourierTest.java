@@ -1,133 +1,77 @@
-package ru.scooter;
+package ru.scooter;;
 
+import io.restassured.response.Response;
 import org.apache.commons.lang3.RandomStringUtils;
-
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import ru.scooter.pojo.ExistingCourier;
 import ru.scooter.pojo.NewCourier;
 import ru.scooter.pojo.ScooterApiClient;
 
-import java.util.HashMap;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.apache.http.HttpStatus.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static ru.scooter.pojo.NewCourier.getRandomCourier;
 
 public class LoginCourierTest {
 
-    private ScooterApiClient client;
-    static HashMap<String, String> randomCourierData = new HashMap<>();
-
-    @BeforeClass
-    public static void generateRandomData() {
-        randomCourierData.put("login", RandomStringUtils.randomAlphabetic(8));
-        randomCourierData.put("password", RandomStringUtils.randomNumeric(8));
-        randomCourierData.put("firstName", RandomStringUtils.randomAlphabetic(8));
-        randomCourierData.put("wrongPassword", RandomStringUtils.randomNumeric(8));
-    }
+    ScooterApiClient client;
+    NewCourier newCourier;
+    int courierId;
+    String password = RandomStringUtils.randomAlphabetic(10);
 
     @Before
     public void setUp() {
         client = new ScooterApiClient();
+        newCourier = getRandomCourier();
     }
 
-    @AfterClass
-    public static void deleteCourier() {
-        ScooterApiClient.deleteCourier(randomCourierData.get("login"),
-                randomCourierData.get("password"));
+    @After
+    public void deleteCourier() {
+        ExistingCourier existingCourierLogin = new ExistingCourier(newCourier.getLogin(), newCourier.getPassword());
+        Response secondResponseLogin = client.loginCourier(existingCourierLogin);
+        assertEquals(SC_OK, secondResponseLogin.statusCode());
+        courierId = secondResponseLogin.body().jsonPath().getInt("id");
+        client.deleteCourier(courierId);
     }
 
     // логин курьера
     @Test
     public void loginNewCourier() {
-
-        final NewCourier newCourier = new NewCourier(randomCourierData.get("login"),
-                randomCourierData.get("password"),
-                randomCourierData.get("firstName"));
-        client.createCourier(newCourier)
-                .then()
-                .statusCode(201)
-                .and()
-                .assertThat()
-                .body("ok", equalTo(true));
-
-        client.loginCourier(newCourier)
-                .then()
-                .statusCode(200)
-                .and()
-                .assertThat()
-                .body("id", notNullValue());
-
-    }
-
-    // если авторизоваться под несуществующим пользователем, запрос возвращает ошибку
-    @Test
-    public void loginNewCourierThatNotExist() {
-        final NewCourier newCourier = new NewCourier(randomCourierData.get("login"),
-                randomCourierData.get("password"),
-                randomCourierData.get("firstName"));
-
-        client.loginCourier(newCourier)
-                .then()
-                .statusCode(404)
-                .and()
-                .assertThat()
-                .body("message", equalTo("Учетная запись не найдена"));
+        Response responseCreate = client.createCourier(newCourier);
+        assertEquals(SC_CREATED, responseCreate.statusCode());
+        ExistingCourier existingCourier = new ExistingCourier(newCourier.getLogin(), newCourier.getPassword());
+        Response responseLogin = client.loginCourier(existingCourier);
+        assertEquals(SC_OK, responseLogin.statusCode());
+        Integer responseMessage = responseLogin.body().jsonPath().getInt("id");
+        assertNotNull(responseMessage);
     }
 
     // система вернёт ошибку, если неправильно указать логин или пароль
     @Test
     public void incorrectCredentialsTest() {
-        final NewCourier newCourier = new NewCourier(randomCourierData.get("login"),
-                randomCourierData.get("password"),
-                randomCourierData.get("firstName"));
-        System.out.println(newCourier);
-        client.createCourier(newCourier)
-                .then()
-                .statusCode(201)
-                .and()
-                .assertThat()
-                .body("ok", equalTo(true));
+        Response responseCreate = client.createCourier(newCourier);
+        assertEquals(SC_CREATED, responseCreate.statusCode());
 
-        final NewCourier newCourier1 =
-                new NewCourier(randomCourierData.get("login"), randomCourierData.get("wrongPass"),
-                        randomCourierData.get("firstName"));
-        System.out.println(newCourier1);
-
-        client.loginCourier(newCourier1)
-                .then()
-                .statusCode(404)
-                .and()
-                .assertThat()
-                .body("message", equalTo("Учетная запись не найдена"));
+        ExistingCourier existingCourier = new ExistingCourier(newCourier.getLogin(), password);
+        Response responseLogin = client.loginCourier(existingCourier);
+        assertEquals(SC_NOT_FOUND, responseLogin.statusCode());
+        String responseMessage = responseLogin.body().jsonPath().getString("message");
+        assertEquals(responseMessage, "Учетная запись не найдена");
     }
 
     // если какого-то поля нет, запрос возвращает ошибку
     @Test
-    public void loginWithoutOneOfCred() {
-        final NewCourier newCourier = new NewCourier(randomCourierData.get("login"),
-                randomCourierData.get("password"),
-                randomCourierData.get("firstName"));
-        System.out.println(newCourier);
-        client.createCourier(newCourier)
-                .then()
-                .statusCode(201)
-                .and()
-                .assertThat()
-                .body("ok", equalTo(true));
+    public void loginWithoutOneOfCredentials() {
+        Response responseCreate = client.createCourier(newCourier);
+        assertEquals(SC_CREATED, responseCreate.statusCode());
 
-        final NewCourier newCourier1 =
-                new NewCourier(null, randomCourierData.get("password"),
-                        randomCourierData.get("firstName"));
-        System.out.println(newCourier1);
-
-        client.loginCourier(newCourier1)
-                .then()
-                .statusCode(400)
-                .and()
-                .assertThat()
-                .body("message", equalTo("Недостаточно данных для входа"));
-        }
+        ExistingCourier existingCourier = new ExistingCourier(null, newCourier.getPassword());
+        Response responseLogin = client.loginCourier(existingCourier);
+        assertEquals(SC_BAD_REQUEST, responseLogin.statusCode());
+        String responseMessage = responseLogin.body().jsonPath().getString("message");
+        assertEquals(responseMessage, "Недостаточно данных для входа");
+    }
 
 }

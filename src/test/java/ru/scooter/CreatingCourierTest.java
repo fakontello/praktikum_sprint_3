@@ -1,84 +1,60 @@
 package ru.scooter;
 
-import org.apache.commons.lang3.RandomStringUtils;
+import io.restassured.response.Response;
+import org.hamcrest.MatcherAssert;
+import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import ru.scooter.pojo.ExistingCourier;
 import ru.scooter.pojo.NewCourier;
 import ru.scooter.pojo.ScooterApiClient;
 
-import java.util.HashMap;
-
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.apache.http.HttpStatus.*;
+import static org.junit.Assert.assertEquals;
+import static ru.scooter.pojo.NewCourier.getRandomCourier;
 
 public class CreatingCourierTest {
 
-    private ScooterApiClient client;
-    static HashMap<String, String> randomCourierData = new HashMap<>();
-
-    @BeforeClass
-    public static void generateRandomData() {
-        randomCourierData.put("login", RandomStringUtils.randomAlphabetic(8));
-        randomCourierData.put("password", RandomStringUtils.randomNumeric(8));
-        randomCourierData.put("firstName", RandomStringUtils.randomAlphabetic(8));
-    }
+    ScooterApiClient client;
+    NewCourier newCourier;
+    int courierId;
 
     @Before
     public void setUp() {
         client = new ScooterApiClient();
     }
 
+    @After
+    public void deleteCourier() {
+        ExistingCourier existingCourierLogin = new ExistingCourier(newCourier.getLogin(), newCourier.getPassword());
+        Response secondResponseLogin = client.loginCourier(existingCourierLogin);
+        assertEquals(SC_OK, secondResponseLogin.statusCode());
+        courierId = secondResponseLogin.body().jsonPath().getInt("id");
+        client.deleteCourier(courierId);
+    }
+
     // Создание нового курьера
     @Test
     public void creatingNewCourier() {
-
-        final NewCourier newCourier = new NewCourier(randomCourierData.get("login"),
-                randomCourierData.get("password"),
-                randomCourierData.get("firstName"));
-        client.createCourier(newCourier)
-                .then()
-                .statusCode(201)
-                .and()
-                .assertThat()
-                .body("ok", equalTo(true));
+        newCourier = getRandomCourier();
+        Response responseCreate = client.createCourier(newCourier);
+        assertEquals(SC_CREATED, responseCreate.statusCode());
+        String responseMessage = responseCreate.body().jsonPath().getString("ok");
+        MatcherAssert.assertThat(responseMessage, true);
     }
 
-    // Создание курьера с сществующим логином
+    // Создание курьера с сществующим логином и паролем
     @Test
     public void attemptToCreateExistingCourier() {
+        newCourier = getRandomCourier();
+        Response responseCreate = client.createCourier(newCourier);
+        assertEquals(SC_CREATED, responseCreate.statusCode());
 
-        final NewCourier newCourier = new NewCourier(randomCourierData.get("login"),
-                randomCourierData.get("password"),
-                randomCourierData.get("firstName"));
+        Response anotherResponseCreate = client.createCourier(newCourier);
+        assertEquals(SC_CONFLICT, anotherResponseCreate.statusCode());
 
-        client.createCourier(newCourier)
-                .then()
-                .statusCode(201)
-                .and()
-                .assertThat()
-                .body("ok", equalTo(true));
-
-        client.createCourier(newCourier)
-                .then()
-                .statusCode(409)
-                .and()
-                .assertThat()
-                .body("message", equalTo("Этот логин уже используется. Попробуйте другой."));
-    }
-
-    // если одного из полей нет, запрос возвращает ошибку
-    @Test
-    public void attemptToCreateCourierWithoutImportantFields() {
-
-        final NewCourier newCourier = new NewCourier(null,
-                randomCourierData.get("password"),
-                randomCourierData.get("firstName"));
-        client.createCourier(newCourier)
-                .then()
-                .statusCode(400)
-                .and()
-                .assertThat()
-                .body("message", equalTo("Недостаточно данных для создания учетной записи"));
+        String responseMessage = responseCreate.body().jsonPath().getString("message");
+        assertEquals(responseMessage, "Этот логин уже используется");
     }
 
 }

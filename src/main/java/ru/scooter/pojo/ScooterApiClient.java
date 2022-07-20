@@ -6,11 +6,9 @@ import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.CoreMatchers.equalTo;
 
 public class ScooterApiClient {
     public static final String BASE_URL = "https://qa-scooter.praktikum-services.ru/api/v1/";
@@ -29,40 +27,26 @@ public class ScooterApiClient {
                 .post("/courier");
     }
 
-    public Response loginCourier(NewCourier newCourier) {
+    public Response loginCourier(ExistingCourier existingCourier) {
         return RestAssured.with()
                 .filters(List.of(requestFilter, responseFilter))
                 .baseUri(BASE_URL)
                 .accept(ContentType.JSON)
                 .contentType(ContentType.JSON)
-                .body(newCourier)
+                .body(existingCourier)
                 .when()
                 .post("/courier/login");
     }
 
-    public static void deleteCourier(String login, String password) {
-        ExistingCourier loginCourier = new ExistingCourier(login, password);
-        Integer id = given()
-                .filters(List.of(requestFilter, responseFilter))
-                .baseUri(BASE_URL)
-                .accept(ContentType.JSON)
-                .contentType(ContentType.JSON)
-                .body(loginCourier)
+    public boolean deleteCourier(int newCourier) {
+        return given()
                 .when()
-                .post("/courier/login")
+                .delete(BASE_URL + "courier/" + newCourier)
                 .then()
-                .statusCode(200)
-                .and()
-                .extract().body().path("id");
-
-        given()
-                .when()
-                .delete(BASE_URL + "courier/" + id)
-                .then()
-                .statusCode(200)
-                .and()
                 .assertThat()
-                .body("ok", equalTo(true));;
+                .statusCode(200)
+                .extract()
+                .path("ok");
     }
 
 }
