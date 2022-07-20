@@ -38,8 +38,8 @@ public class ScooterApiClient {
                 .post("/courier/login");
     }
 
-    public boolean deleteCourier(int newCourier) {
-        return given()
+    public void deleteCourier(int newCourier) {
+        given()
                 .when()
                 .delete(BASE_URL + "courier/" + newCourier)
                 .then()
