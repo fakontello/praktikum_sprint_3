@@ -60,6 +60,16 @@ public class ScooterApiClient {
                 .post("/orders");
     }
 
+    public Response getOrders() {
+        return RestAssured.with()
+                .filters(List.of(requestFilter, responseFilter))
+                .baseUri(BASE_URL)
+                .accept(ContentType.JSON)
+                .contentType(ContentType.JSON)
+                .when()
+                .get("/orders");
+    }
+
 //    public void deleteOrder(Integer responseMessage) {
 //        String json = "{\"track\": }";
 //        RestAssured.with()
