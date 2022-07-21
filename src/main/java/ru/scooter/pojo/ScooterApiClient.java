@@ -70,16 +70,4 @@ public class ScooterApiClient {
                 .get("/orders");
     }
 
-//    public void deleteOrder(Integer responseMessage) {
-//        String json = "{\"track\": }";
-//        RestAssured.with()
-//                .filters(List.of(requestFilter, responseFilter))
-//                .baseUri(BASE_URL)
-//                .accept(ContentType.JSON)
-//                .contentType(ContentType.JSON)
-//                .body(responseMessage)
-//                .when()
-//                .put("/orders/cancel");
-//    }
-
 }
