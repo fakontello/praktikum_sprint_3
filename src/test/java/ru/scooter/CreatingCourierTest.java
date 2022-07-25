@@ -53,8 +53,8 @@ public class CreatingCourierTest {
         Response anotherResponseCreate = client.createCourier(newCourier);
         assertEquals(SC_CONFLICT, anotherResponseCreate.statusCode());
 
-        String responseMessage = responseCreate.body().jsonPath().getString("message");
-        assertEquals(responseMessage, "Этот логин уже используется");
+        String responseMessage = anotherResponseCreate.body().jsonPath().getString("message");
+        assertEquals(responseMessage, "Этот логин уже используется. Попробуйте другой.");
     }
 
 }
